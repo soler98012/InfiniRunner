@@ -3,6 +3,11 @@ const height = 1080;
 const playerSize = 5;
 const maxSpd = 10;
 var enemies;
+const particleSize = 15;
+
+function randomnum(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+}
 setup = function () {
     var myCanvas = createCanvas(width, height);
     myCanvas.parent("game-container");
@@ -20,10 +25,16 @@ function createEnemy(x, y, sizex, sizey, spd, dir) {
     e.setSpeed(spd, dir);
     enemies.add(e);
 }
+
 function createCircleEnemy(x, y, sizex, sizey, spd, dir) {
     var e = createSprite(x, y, sizey, sizex);
     e.shapeColor = color(0, 255, 0);
     e.setSpeed(spd, dir);
+    e.setCollider("circle")
+    e.draw = function () {
+        fill(e.shapeColor)
+        ellipse(0, 0, sizey, sizex)
+    }
     enemies.add(e);
 }
 
@@ -37,21 +48,38 @@ function enemyLine(side, size, spd, sep, offset = 0) {
 
 function cleanEnemies() {
     for (var i = 0; i < enemies.length; i++) {
-        if (enemies[i].position.x < 0 || enemies[i].position.x > width || enemies[i].position.y < 0 || enemies[i].position.y > height)
+        if (enemies[i].position.x + enemies[i].width < 0 || enemies[i].position.x - enemies[i].width > width || enemies[i].position.y + enemies[i].height < 0 || enemies[i].position.y - enemies[i].height > height)
             enemies[i].remove();
     }
 }
 
 function handlePlayer() {
+    //particles
+    if(frameCount % 10 == 0){
+        part = createSprite(player.position.x,player.position.y,particleSize,particleSize);
+        part.rotationSpeed = player.velocity.x;
+        part.depth = -100;
+        part.shapeColor = color(255,randomnum(0,255),0,129)
+        part.velocity.x = -player.velocity.x * 0.5;
+        part.velocity.y = -player.velocity.y * 0.5;
+    }
+    //movement
     if (!(mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height)) {
         //player.position.x = mouseX;
         //player.position.y = mouseY;
-        player.velocity.x = Math.min((mouseX-player.position.x)/10,maxSpd);
-        player.velocity.y = Math.min((mouseY-player.position.y)/10,maxSpd);
+        player.velocity.x = Math.min((mouseX - player.position.x) / 10, maxSpd);
+        player.velocity.y = Math.min((mouseY - player.position.y) / 10, maxSpd);
+    } else {
+        player.velocity.x = 0;
+        player.velocity.y = 0;
     }
+    //death
     if (player.overlap(enemies) || enemies.overlap(player)) {
         player.remove();
     }
+
+    
+
 }
 
 function handleEnemies() {
@@ -63,18 +91,21 @@ function handleEnemies() {
         }
     }
     //phase 1
-    else if (curmillis < 30000 && frameCount % 10 == 0) {
-        createEnemy()
+    else if (curmillis < 30000) {
+        if (frameCount % 120 == 0) {
+            if (frameCount / 120 % 2 == 0) createCircleEnemy(0, -width/2, width, width, 5, 90);
+            else createCircleEnemy(width, -width/2, width, width, 5, 90);
+        }
     }
 
 }
 
 function draw() {
-    curmillis = millis();
+    curmillis = millis() + 50000;
     background(0);
     handlePlayer()
     handleEnemies()
-
+    console.log(player.velocity.x,player.velocity.y)
     cleanEnemies();
 
     drawSprites();
