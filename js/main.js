@@ -1,6 +1,6 @@
 const width = 720;
 const height = 1080;
-const playerSize = 5;
+const playerSize = 20;
 const maxSpd = 10;
 var enemies;
 const particleSize = 15;
@@ -14,6 +14,8 @@ setup = function () {
 
     player = createSprite(width / 2, height / 2, playerSize, playerSize);
     player.shapeColor = color(255, 0, 0);
+    
+    player.setCollider("rectangle",0,0,1,1)
     noStroke();
     frameRate(120);
     enemies = new Group();
@@ -55,13 +57,14 @@ function cleanEnemies() {
 
 function handlePlayer() {
     //particles
-    if(frameCount % 10 == 0){
+    if(frameCount % 10 == 0 && Math.round(player.velocity.x) != 0 && Math.round(player.velocity.y != 0)){
         part = createSprite(player.position.x,player.position.y,particleSize,particleSize);
         part.rotationSpeed = player.velocity.x;
         part.depth = -100;
         part.shapeColor = color(255,randomnum(0,255),0,129)
         part.velocity.x = -player.velocity.x * 0.5;
         part.velocity.y = -player.velocity.y * 0.5;
+        part.life = 120;
     }
     //movement
     if (!(mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height)) {
@@ -77,8 +80,17 @@ function handlePlayer() {
     if (player.overlap(enemies) || enemies.overlap(player)) {
         player.remove();
     }
-
-    
+    //draw
+    player.draw = function(){
+        fill(255)
+        //ellipse(0, 0, playerSize, playerSize)
+        push();
+        rotate(radians(this.getDirection()));
+        ellipse(0, 0, playerSize+(this.getSpeed()*0.5), playerSize-this.getSpeed()*0.5);
+        pop();
+        fill(player.shapeColor)
+        ellipse(0, 0, 5, 5)
+    }
 
 }
 
@@ -101,12 +113,11 @@ function handleEnemies() {
 }
 
 function draw() {
-    curmillis = millis() + 50000;
+    curmillis = millis();
     background(0);
-    handlePlayer()
-    handleEnemies()
+    handlePlayer();
+    handleEnemies();
     console.log(player.velocity.x,player.velocity.y)
     cleanEnemies();
-
     drawSprites();
 }
