@@ -11,7 +11,7 @@ var onMenu = true;
 let menufont;
 
 function preload() {
-    menufont = loadFont('./Symtext.ttf');
+    menufont = loadFont('css/Symtext.ttf');
 }
 
 function randomnum(min, max) {
