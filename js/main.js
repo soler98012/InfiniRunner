@@ -5,6 +5,15 @@ const maxSpd = 10;
 var enemies;
 const particleSize = 15;
 
+let startFrame, startMilis
+
+var onMenu = true;
+let menufont;
+
+function preload() {
+    menufont = loadFont('../css/Symtext.ttf');
+}
+
 function randomnum(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -14,8 +23,8 @@ setup = function () {
 
     player = createSprite(width / 2, height / 2, playerSize, playerSize);
     player.shapeColor = color(255, 0, 0);
-    
-    player.setCollider("rectangle",0,0,1,1)
+
+    player.setCollider("rectangle", 0, 0, 1, 1)
     noStroke();
     frameRate(120);
     enemies = new Group();
@@ -57,11 +66,11 @@ function cleanEnemies() {
 
 function handlePlayer() {
     //particles
-    if(frameCount % 10 == 0 && Math.round(player.velocity.x) != 0 && Math.round(player.velocity.y != 0)){
-        part = createSprite(player.position.x,player.position.y,particleSize,particleSize);
+    if (frames % 10 == 0 && Math.round(player.velocity.x) != 0 && Math.round(player.velocity.y != 0)) {
+        part = createSprite(player.position.x, player.position.y, particleSize, particleSize);
         part.rotationSpeed = player.velocity.x;
         part.depth = -100;
-        part.shapeColor = color(255,randomnum(0,255),0,129)
+        part.shapeColor = color(255, randomnum(0, 255), 0, 129)
         part.velocity.x = -player.velocity.x * 0.5;
         part.velocity.y = -player.velocity.y * 0.5;
         part.life = 120;
@@ -81,12 +90,12 @@ function handlePlayer() {
         player.remove();
     }
     //draw
-    player.draw = function(){
+    player.draw = function () {
         fill(255)
         //ellipse(0, 0, playerSize, playerSize)
         push();
         rotate(radians(this.getDirection()));
-        ellipse(0, 0, playerSize+(this.getSpeed()*0.5), playerSize-this.getSpeed()*0.5);
+        ellipse(0, 0, playerSize + (this.getSpeed() * 0.5), playerSize - this.getSpeed() * 0.5);
         pop();
         fill(player.shapeColor)
         ellipse(0, 0, 5, 5)
@@ -97,27 +106,34 @@ function handlePlayer() {
 function handleEnemies() {
     //phase 0
     if (curmillis < 10000) {
-        if (frameCount % 60 == 0) {
-            if (frameCount / 60 % 2 == 0) createEnemy(width / 4, 0, 20, width / 2, 5, 90);
+        if (frames % 60 == 0) {
+            if (frames / 60 % 2 == 0) createEnemy(width / 4, 0, 20, width / 2, 5, 90);
             else createEnemy(width - width / 4, 0, 20, width / 2, 5, 90);
         }
     }
     //phase 1
     else if (curmillis < 30000) {
-        if (frameCount % 120 == 0) {
-            if (frameCount / 120 % 2 == 0) createCircleEnemy(0, -width/2, width, width, 5, 90);
-            else createCircleEnemy(width, -width/2, width, width, 5, 90);
+        if (frames % 120 == 0) {
+            if (frames / 120 % 2 == 0) createCircleEnemy(0, -width / 2, width, width, 5, 90);
+            else createCircleEnemy(width, -width / 2, width, width, 5, 90);
         }
     }
 
 }
 
 function draw() {
-    curmillis = millis();
-    background(0);
-    handlePlayer();
-    handleEnemies();
-    console.log(player.velocity.x,player.velocity.y)
-    cleanEnemies();
-    drawSprites();
+    if (onMenu == false) {
+        curmillis = millis() - startMilis;
+        frames = frameCount - startFrame;
+        background(0);
+        handlePlayer();
+        handleEnemies();
+        console.log(player.velocity.x, player.velocity.y)
+        cleanEnemies();
+        drawSprites();
+    } else{
+        textFont(menufont);
+        textAlign(CENTER);
+        text("Bulleteer",width/2,20)
+    }
 }
