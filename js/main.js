@@ -4,8 +4,9 @@ const playerSize = 20;
 const maxSpd = 10;
 var enemies;
 const particleSize = 15;
-
-let startFrame, startMilis
+const startx = width / 2,
+    starty = height / 2 + 70
+let startFrame, startMillis
 
 var onMenu = true;
 let menufont;
@@ -18,16 +19,30 @@ function randomnum(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
 setup = function () {
+    debug = true;
+
     var myCanvas = createCanvas(width, height);
     myCanvas.parent("game-container");
-
-    player = createSprite(width / 2, height / 2, playerSize, playerSize);
-    player.shapeColor = color(255, 0, 0);
-
-    player.setCollider("rectangle", 0, 0, 1, 1)
+    startbutton = createSprite(startx, starty, playerSize + 5, playerSize + 5);
+    startbutton.shapeColor = color(255, 0, 0);
     noStroke();
     frameRate(120);
     enemies = new Group();
+
+    startbutton.onMousePressed = function () {
+        if (onMenu = true) {
+            console.log("test");
+            startMillis = millis();
+            startFrame = frameCount;
+            onMenu = false;
+            this.visible = false;
+            //player.position = startbutton.position;
+
+            player = createSprite(startx, starty, playerSize, playerSize);
+            //player.shapeColor = color(255, 0, 0);
+            player.setCollider("rectangle", 0, 0, 1, 1)
+        }
+    }
 }
 
 function createEnemy(x, y, sizex, sizey, spd, dir) {
@@ -66,7 +81,7 @@ function cleanEnemies() {
 
 function handlePlayer() {
     //particles
-    if (frames % 10 == 0 && Math.round(player.velocity.x) != 0 && Math.round(player.velocity.y != 0)) {
+    if (frames % 10 == 0 && Math.round(player.velocity.x) != 0 && Math.round(player.velocity.y != 0) && player.visible == true) {
         part = createSprite(player.position.x, player.position.y, particleSize, particleSize);
         part.rotationSpeed = player.velocity.x;
         part.depth = -100;
@@ -87,7 +102,10 @@ function handlePlayer() {
     }
     //death
     if (player.overlap(enemies) || enemies.overlap(player)) {
+        onMenu = true;
+        startbutton.visible = true;
         player.remove();
+        //player.visible = false;
     }
     //draw
     player.draw = function () {
@@ -123,17 +141,47 @@ function handleEnemies() {
 
 function draw() {
     if (onMenu == false) {
-        curmillis = millis() - startMilis;
+        curmillis = millis() - startMillis;
         frames = frameCount - startFrame;
         background(0);
         handlePlayer();
         handleEnemies();
         console.log(player.velocity.x, player.velocity.y)
         cleanEnemies();
-        drawSprites();
-    } else{
+    } else {
+        background(0);
         textFont(menufont);
+        textSize(100);
+        fill(255, 255, 255)
         textAlign(CENTER);
-        text("Bulleteer",width/2,20)
+        text("Bulleteer", width / 2, 100)
+
+
+        textSize(25);
+        text("click the circle to start", width / 2, 450)
+
+        rect(
+            width / 2 - 10,
+            500,
+            20,
+            20 + ((Math.sin(frameCount / 20) + 1) * 20)
+        )
+        triangle(
+            width / 2 - 20,
+            490 + 20 + ((Math.sin(frameCount / 20) + 1) * 20),
+
+            width / 2 + 20,
+            490 + 20 + ((Math.sin(frameCount / 20) + 1) * 20),
+
+            width / 2,
+            510 + 20 + ((Math.sin(frameCount / 20) + 1) * 20),
+        )
+
+        startbutton.draw = function () {
+            fill(255);
+            ellipse(0, 0, playerSize + 10, playerSize + 10);
+        }
+
     }
+    drawSprites();
 }
