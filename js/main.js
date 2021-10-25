@@ -30,7 +30,7 @@ setup = function () {
     enemies = new Group();
 
     startbutton.onMousePressed = function () {
-        if (onMenu = true) {
+        if (onMenu == true) {
             console.log("test");
             startMillis = millis();
             startFrame = frameCount;
